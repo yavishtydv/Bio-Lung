@@ -23,7 +23,8 @@ jobs:
         run: |
           sed -i 's/\r$//' gradlew
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug -x exportApk
+          cp app/build/outputs/apk/debug/*.apk BioLung.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
