@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bio Lung</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--line:#e2e8f0;--tx:#1e293b;--hd:#0f172a;--mut:#64748b;--dim:#94a3b8;--em:#10b981;--em6:#059669;--em7:#047857;--sky:#0ea5e9;--amb:#f59e0b;--teal:#14b8a6;--red:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Inter,system-ui,'Segoe UI',Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.mono,.big b,#log,.row b{font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-variant-numeric:tabular-nums}
+header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(16,185,129,.3)}
+.logo svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+h1{margin:0;font-size:17px;font-weight:700;color:var(--hd);letter-spacing:-.01em;line-height:1.1}
+h1 small{display:block;color:var(--em7);font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-top:3px;font-family:'JetBrains Mono',Consolas,monospace}
+.hr{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#f1f5f9;border:1px solid var(--line);color:var(--mut)}
+.pill.ok{background:#ecfdf5;border-color:#a7f3d0;color:var(--em7)}
+.pill.bad{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+.pill.warn{background:#fffbeb;border-color:#fde68a;color:#b45309}
+.sim{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--mut);background:#f1f5f9;border:1px solid var(--line);border-radius:10px;padding:4px 8px 4px 12px}
+.sw{position:relative;width:38px;height:20px;background:#cbd5e1;border-radius:99px;cursor:pointer;transition:.2s}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.sw.on{background:var(--em6)}.sw.on::after{left:20px}
+main{display:grid;gap:16px;padding:20px 24px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));max-width:1320px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(15,23,42,.05);transition:border-color .2s}
+.card:hover{border-color:#cbd5e1}
+.card h2{margin:0 0 10px;font-size:11.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.big{font-size:34px;font-weight:700;color:var(--hd);line-height:1.1}
+.big span{font-size:14px;font-weight:600;color:var(--mut);margin-left:5px;font-family:Inter,system-ui,sans-serif}
+.sub{font-size:11.5px;color:var(--dim);margin-top:6px}
+.bar{height:6px;background:#f1f5f9;border-radius:99px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;transition:width .5s}
+.b-sky{background:linear-gradient(90deg,#38bdf8,#0ea5e9)}
+.b-em{background:linear-gradient(90deg,#34d399,#10b981)}
+.b-red{background:linear-gradient(90deg,#f87171,#ef4444)}
+.b-amb{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+canvas{width:100%;height:96px;display:block;margin-top:10px;background:var(--bg);border:1px solid #f1f5f9;border-radius:10px}
+.seg{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px;margin:10px 0 0}
+.seg button{flex:1;padding:7px 4px;background:transparent;color:var(--mut);border:1px solid transparent;border-radius:7px;cursor:pointer;font:600 12px Inter,system-ui,sans-serif;transition:.15s}
+.seg button:hover{background:#f8fafc;color:var(--hd)}
+.seg button.act{background:#ecfdf5;color:var(--em7);border-color:#a7f3d0}
+.seg button.byp{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.act-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:2px}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;margin-top:14px;color:var(--mut)}
+.row b{font-size:17px;color:var(--em6)}
+.state{font-size:11.5px;font-weight:700;padding:2px 10px;border-radius:99px;letter-spacing:.04em}
+.state.on{background:#d1fae5;color:var(--em7)}.state.off{background:#e2e8f0;color:#475569}
+input[type=range]{width:100%;accent-color:var(--em6);margin:8px 0 0;cursor:pointer}
+.gauge{display:flex;justify-content:center}
+.gauge canvas{width:230px;height:140px;background:none;border:0;margin:0}
+#log{height:220px;overflow-y:auto;font-size:12px;background:var(--hd);color:#cbd5e1;border-radius:10px;padding:10px}
+#log div{padding:4px 0;border-bottom:1px solid #1e293b}
+#log i{color:#38bdf8;font-style:normal;margin-right:10px}
+.wide{grid-column:1/-1}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+.modesw{display:flex;gap:3px;background:#f1f5f9;border:1px solid var(--line);border-radius:10px;padding:3px}
+.modesw button{border:0;background:transparent;padding:6px 14px;border-radius:7px;font:700 12px Inter,system-ui,sans-serif;letter-spacing:.04em;color:var(--mut);cursor:pointer}
+.modesw button.on{background:#fff;color:var(--em7);box-shadow:0 1px 3px rgba(15,23,42,.15)}
+#m-real.on{background:linear-gradient(135deg,#34d399,#059669);color:#fff}
+#m-real.locked{opacity:.45;cursor:not-allowed}
+#m-real.locked::after{content:'\1F512';font-size:10px;margin-left:5px}
+.banner{position:fixed;left:12px;right:12px;bottom:14px;max-width:600px;margin:auto;z-index:20;display:none;align-items:center;gap:10px;flex-wrap:wrap;background:#0f172a;color:#f1f5f9;border-left:4px solid var(--amb);border-radius:12px;padding:12px 14px;font-size:13px;box-shadow:0 10px 30px rgba(15,23,42,.35)}
+.banner.bad{border-left-color:var(--red)}
+.banner span{flex:1;min-width:180px;line-height:1.4}
+.banner button{border:0;border-radius:8px;padding:7px 12px;font:700 12px Inter,system-ui,sans-serif;cursor:pointer;background:linear-gradient(135deg,#34d399,#059669);color:#fff}
+.banner button.x{background:transparent;color:#94a3b8;padding:7px 8px}
+@media(max-width:600px){header{padding:10px 14px}main{padding:12px;gap:12px}.big{font-size:30px}}
+</style></head><body>
+<header>
+  <div class="brand">
+    <div class="logo"><svg viewBox='0 0 24 24'><path d='M12 3C7 8 5 11 5 14a7 7 0 0014 0c0-3-2-6-7-11z'/><path d='M12 21v-8'/></svg></div>
+    <h1>Bio Lung<small>Smart Microalgae Photobioreactor</small></h1>
+  </div>
+  <div class="hr">
+    <span class="pill" id="conn">connecting...</span>
+    <span class="pill" id="warm">MQ-135 warm-up</span>
+    <span class="pill ok" id="rdy" style="display:none">ESP32 Ready</span>
+    <div class="modesw"><button id="m-demo" class="on">DEMO</button><button id="m-real" class="locked">REAL</button></div>
+  </div>
+</header>
+<div class="banner" id="banner"><span id="bmsg"></span><button id="bwifi">Wi-Fi Settings</button><button id="bclose" class="x">&#10005;</button></div>
+<main>
+  <div class="card">
+    <h2>Water Temp <span class="pill" id="tbadge">--</span></h2>
+    <div class="big"><b id="tv">--</b><span>&deg;C</span></div>
+    <div class="sub">Optimal range 22 - 35 &deg;C</div>
+    <div class="bar"><i id="bt" class="b-sky"></i></div>
+    <canvas id="ct" width="400" height="90"></canvas>
+    <div class="seg" id="seg-stemp" data-o="ACTIVE,BYPASSED"></div>
+  </div>
+  <div class="card">
+    <h2>MQ-135 Smoke / CO&#8322; <span class="pill" id="mbadge">--</span></h2>
+    <div class="big"><b id="mv">--</b><span>RAW ADC</span></div>
+    <div class="sub" id="msub">Trigger threshold</div>
+    <div class="bar"><i id="bm" class="b-em"></i></div>
+    <canvas id="cm" width="400" height="90"></canvas>
+    <div class="seg" id="seg-smq" data-o="ACTIVE,BYPASSED"></div>
+  </div>
+  <div class="card">
+    <h2>Ambient Light <span class="pill" id="lbadge">--</span></h2>
+    <div class="big"><b id="lv">--</b><span>%</span></div>
+    <div class="sub" id="lsub">LDR level</div>
+    <div class="bar"><i id="bl" class="b-amb"></i></div>
+    <div class="seg" id="seg-sldr" data-o="ACTIVE,BYPASSED"></div>
+  </div>
+  <div class="card">
+    <h2>Photosynthesis Efficiency</h2>
+    <div class="gauge"><canvas id="cg" width="460" height="280"></canvas></div>
+    <div class="sub" style="text-align:center">Based on temperature, light and air quality</div>
+  </div>
+  <div class="card">
+    <h2>Grow Light <span class="state off" id="ls">OFF</span></h2>
+    <div class="act-box">
+      <div class="seg" id="seg-light" data-o="ON,OFF,AUTO" style="margin-top:0"></div>
+      <div class="row">LDR darkness trigger <b id="ltv">--</b></div>
+      <input type="range" id="ltr" min="0" max="4095" step="25">
+      <div class="sub">AUTO: light turns ON when darkness value rises above trigger.</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Air Pump <span class="state off" id="ps">OFF</span></h2>
+    <div class="act-box">
+      <div class="seg" id="seg-pump" data-o="ON,OFF,AUTO" style="margin-top:0"></div>
+      <div class="row">MQ-135 smoke trigger <b id="mtv">--</b></div>
+      <input type="range" id="mtr" min="0" max="4095" step="25">
+      <div class="sub">AUTO: pump on smoke/CO2 spike + 20 s circulation every 5 min.</div>
+    </div>
+  </div>
+  <div class="card wide">
+    <h2>Live Event Log</h2>
+    <div id="log"></div>
+  </div>
+</main>
+<script>
+var $=function(i){return document.getElementById(i)};
+var S={t:null,mq:0,ldr:0,dark:0,lm:'AUTO',pm:'AUTO',lo:0,po:0,st:1,sm:1,sl:1,lt:2500,mt:2000,warm:0,ev:[]};
+var BASE="http://192.168.4.1",demo=true,lastEv=0,demoEv=0,tHist=[],mHist=[],MAXH=60,simT=0,busy=0;
+var simDark=false,simSmoke=false,simCirc=false,simWarmEnd=0;
+
+function addLog(m){
+  var d=document.createElement('div');
+  var i=document.createElement('i');
+  i.textContent=new Date().toLocaleTimeString();
+  d.appendChild(i);d.appendChild(document.createTextNode(m));
+  var l=$('log');l.insertBefore(d,l.firstChild);
+  while(l.children.length>150)l.removeChild(l.lastChild);
+}
+
+/* ---- segmented buttons ---- */
+function buildSegs(){
+  var segs=document.querySelectorAll('.seg');
+  for(var k=0;k<segs.length;k++){
+    (function(box){
+      var key=box.id.substring(4);
+      box.getAttribute('data-o').split(',').forEach(function(o){
+        var b=document.createElement('button');
+        b.textContent=o;b.setAttribute('data-v',o);
+        b.addEventListener('click',function(){send(key,o)});
+        box.appendChild(b);
+      });
+    })(segs[k]);
+  }
+}
+function paintSeg(key,val){
+  var bs=$('seg-'+key).children;
+  for(var i=0;i<bs.length;i++){
+    var v=bs[i].getAttribute('data-v');
+    bs[i].className=(v==val)?(v=='BYPASSED'?'byp':'act'):'';
+  }
+}
+
+/* ---- control ---- */
+function send(key,val){
+  if(demo){applyDemo(key,val);render();return}
+  tf(BASE+'/control?'+key+'='+encodeURIComponent(val)).then(function(j){if(!demo){S=merge(j);render()}}).catch(function(){});
+}
+function merge(j){return j}
+function applyDemo(key,val){
+  if(key=='light'){S.lm=val;addLog('Grow light mode: '+val)}
+  else if(key=='pump'){S.pm=val;addLog('Air pump mode: '+val)}
+  else if(key=='stemp'){S.st=(val=='ACTIVE')?1:0;addLog('Temp sensor '+val)}
+  else if(key=='smq'){S.sm=(val=='ACTIVE')?1:0;addLog('MQ-135 sensor '+val)}
+  else if(key=='sldr'){S.sl=(val=='ACTIVE')?1:0;addLog('LDR sensor '+val)}
+  else if(key=='ldrth'){S.lt=parseInt(val)}
+  else if(key=='mqth'){S.mt=parseInt(val)}
+}
+var tmr1=null,tmr2=null;
+function sliderSend(id,key){
+  $(id).addEventListener('input',function(){
+    var v=$(id).value;
+    if(key=='ldrth'){S.lt=+v;$('ltv').textContent=v}else{S.mt=+v;$('mtv').textContent=v}
+    clearTimeout(id=='ltr'?tmr1:tmr2);
+    var t=setTimeout(function(){
+      if(demo){applyDemo(key,v)}else{tf(BASE+'/control?'+key+'='+v).catch(function(){})}
+    },250);
+    if(id=='ltr')tmr1=t;else tmr2=t;
+  });
+}
+
+/* ---- demo simulator ---- */
+function demoStep(){
+  simT+=1;
+  var now=Date.now();
+  var env=Math.sin(simT/25);
+  var ldr=2000+env*1900+Math.random()*80;
+  var spike=(simT%40>28)?1400:0;
+  var mq=900+Math.sin(simT/9)*150+spike+Math.random()*60;
+  var t=27+Math.sin(simT/30)*6+Math.random()*0.2;
+  S.t=S.st?+t.toFixed(1):null;S.mq=Math.round(mq);S.ldr=Math.round(ldr);
+  S.warm=Math.max(0,Math.round((simWarmEnd-now)/1000));
+  var H=150;
+  if(S.sl){
+    if(!simDark&&S.ldr>S.lt+H){simDark=true;addLog('Darkness detected - AUTO grow light trigger')}
+    if(simDark&&S.ldr<S.lt-H){simDark=false;addLog('Daylight restored')}
+  }else simDark=false;
+  if(S.sm&&S.warm==0){
+    if(!simSmoke&&S.mq>S.mt+H){simSmoke=true;addLog('Smoke/CO2 spike detected - pump trigger')}
+    if(simSmoke&&S.mq<S.mt-H){simSmoke=false;addLog('Air quality normal')}
+  }else simSmoke=false;
+  var c=(simT%300)<20;
+  if(c!=simCirc){simCirc=c;addLog(c?'Circulation cycle started':'Circulation cycle finished')}
+  S.dark=simDark?1:0;
+  S.lo=S.lm=='ON'?1:(S.lm=='OFF'?0:(simDark?1:0));
+  S.po=S.pm=='ON'?1:(S.pm=='OFF'?0:((simSmoke||simCirc)?1:0));
+}
+
+/* ---- render ---- */
+function eff(){
+  var ts=0,ls=0.5,as=1;
+  if(S.t!==null){
+    var t=S.t;
+    if(t>=26&&t<=32)ts=1;
+    else if(t>=22&&t<26)ts=0.6+0.4*(t-22)/4;
+    else if(t>32&&t<=35)ts=0.6+0.4*(35-t)/3;
+    else ts=Math.max(0,0.6-Math.min(Math.abs(t<22?22-t:t-35),6)/10);
+  }else ts=0.5;
+  if(S.lo||(!S.dark&&S.sl))ls=1;else if(S.sl&&S.dark)ls=0.25;
+  if(S.sm&&S.warm==0){as=S.mq>S.mt?Math.max(0.3,1-(S.mq-S.mt)/3000):1}
+  return Math.round(100*ts*(0.6+0.4*ls)*(0.8+0.2*as));
+}
+function setBar(id,v,c){var e=$(id);e.style.width=Math.max(0,Math.min(100,v))+'%';e.className=c}
+function setPill(id,txt,cls){var e=$(id);e.textContent=txt;e.className='pill '+cls}
+function setState(id,on){var e=$(id);e.textContent=on?'ON':'OFF';e.className='state '+(on?'on':'off')}
+
+function render(){
+  if(S.t===null){
+    $('tv').textContent=S.st?'ERR':'--';
+    setPill('tbadge',S.st?'SENSOR ERROR':'BYPASSED',S.st?'bad':'warn');
+  }else{
+    $('tv').textContent=S.t.toFixed(1);
+    var ok=S.t>=22&&S.t<=35;
+    setPill('tbadge',ok?'OPTIMAL':(S.t<22?'TOO COLD':'TOO HOT'),ok?'ok':'bad');
+  }
+  $('mv').textContent=S.sm?S.mq:'--';
+  if(!S.sm)setPill('mbadge','BYPASSED','warn');
+  else if(S.warm>0)setPill('mbadge','WARMING UP','warn');
+  else if(S.mq>S.mt)setPill('mbadge','HIGH','bad');
+  else setPill('mbadge','CLEAN','ok');
+  $('msub').textContent='Trigger threshold: '+S.mt;
+  var pct=Math.round(100-S.ldr/40.95);
+  if(!S.sl){$('lv').textContent='--';setPill('lbadge','BYPASSED','warn')}
+  else{
+    $('lv').textContent=pct;
+    setPill('lbadge',S.dark?'DARK':'BRIGHT',S.dark?'warn':'ok');
+  }
+  $('lsub').textContent='Raw '+S.ldr+' (higher = darker)';
+  setState('ls',S.lo);setState('ps',S.po);
+  paintSeg('light',S.lm);paintSeg('pump',S.pm);
+  paintSeg('stemp',S.st?'ACTIVE':'BYPASSED');
+  paintSeg('smq',S.sm?'ACTIVE':'BYPASSED');
+  paintSeg('sldr',S.sl?'ACTIVE':'BYPASSED');
+  $('ltv').textContent=S.lt;$('mtv').textContent=S.mt;
+  if(document.activeElement!==$('ltr'))$('ltr').value=S.lt;
+  if(document.activeElement!==$('mtr'))$('mtr').value=S.mt;
+  if(S.warm>0)setPill('warm','MQ-135 warm-up: '+S.warm+'s','warn');
+  else setPill('warm','MQ-135 ready','ok');
+  setBar('bt',S.t===null?0:(S.t-10)/30*100,'b-sky');
+  setBar('bm',S.sm?S.mq/40.95:0,(S.sm&&S.mq>S.mt)?'b-red':'b-em');
+  setBar('bl',S.sl?pct:0,'b-amb');
+  drawChart('ct',tHist,10,40,'#0ea5e9',[22,35]);
+  drawChart('cm',mHist,0,4095,'#10b981',[S.mt]);
+  drawGauge(eff());
+}
+
+function drawChart(id,data,mn,mx,col,lines){
+  var c=$(id),g=c.getContext('2d'),w=c.width,h=c.height;
+  g.clearRect(0,0,w,h);
+  g.strokeStyle='#e2e8f0';g.lineWidth=1;
+  for(var i=1;i<4;i++){g.beginPath();g.moveTo(0,h*i/4);g.lineTo(w,h*i/4);g.stroke()}
+  g.setLineDash([4,4]);g.strokeStyle='#94a3b8';
+  lines.forEach(function(v){
+    var y=h-(v-mn)/(mx-mn)*h;
+    g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke();
+  });
+  g.setLineDash([]);
+  g.strokeStyle=col;g.lineWidth=2.5;g.lineJoin='round';g.beginPath();
+  var started=false;
+  for(var k=0;k<data.length;k++){
+    if(data[k]===null){started=false;continue}
+    var x=k/(MAXH-1)*w;
+    var y=h-(Math.min(Math.max(data[k],mn),mx)-mn)/(mx-mn)*h;
+    if(!started){g.moveTo(x,y);started=true}else g.lineTo(x,y);
+  }
+  g.stroke();
+}
+function drawGauge(v){
+  var c=$('cg'),g=c.getContext('2d'),w=c.width,h=c.height;
+  g.clearRect(0,0,w,h);
+  var cx=w/2,cy=h-40,r=140;
+  g.lineWidth=26;g.lineCap='round';
+  g.strokeStyle='#f1f5f9';
+  g.beginPath();g.arc(cx,cy,r,Math.PI,2*Math.PI);g.stroke();
+  var col=v>=70?'#10b981':(v>=40?'#f59e0b':'#ef4444');
+  var lg=g.createLinearGradient(cx-r,0,cx+r,0);
+  lg.addColorStop(0,v>=70?'#34d399':(v>=40?'#fbbf24':'#f87171'));lg.addColorStop(1,col);
+  g.strokeStyle=lg;
+  g.beginPath();g.arc(cx,cy,r,Math.PI,Math.PI+Math.PI*v/100);g.stroke();
+  g.fillStyle='#0f172a';g.font='bold 54px Consolas,monospace';g.textAlign='center';
+  g.fillText(v+'%',cx,cy-4);
+}
+
+/* ---- networking ---- */
+var reachable=false,failCnt=0,mode='demo';
+function tf(url){
+  var ac=new AbortController();
+  var tm=setTimeout(function(){ac.abort()},1500);
+  return fetch(url,{signal:ac.signal,cache:'no-store'}).then(function(r){
+    clearTimeout(tm);
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  },function(e){clearTimeout(tm);throw e});
+}
+function pushHist(){
+  tHist.push(S.t);mHist.push(S.sm?S.mq:null);
+  if(tHist.length>MAXH){tHist.shift();mHist.shift()}
+}
+
+/* ---- banner ---- */
+function showBanner(msg,bad){
+  $('bmsg').textContent=msg;
+  $('banner').className='banner'+(bad?' bad':'');
+  $('banner').style.display='flex';
+}
+function hideBanner(){$('banner').style.display='none'}
+function openWifi(){
+  if(window.AndroidBridge&&AndroidBridge.openWifiSettings)AndroidBridge.openWifiSettings();
+  else addLog('Open your device Wi-Fi settings and join Bio Lung');
+}
+var WIFI_MSG="Connect to Wi-Fi 'Bio Lung' (Password: Camb@2026) to enable Real Mode";
+
+/* ---- reachability ---- */
+function setReach(r){
+  reachable=r;
+  $('m-real').className=(mode=='real'?'on':(r?'':'locked'));
+  $('rdy').style.display=(r&&mode=='demo')?'inline-block':'none';
+  if(r&&mode=='demo'&&$('bmsg').textContent==WIFI_MSG)hideBanner();
+}
+function reachTick(){
+  if(mode!='demo')return;
+  tf(BASE+'/status').then(function(){setReach(true)}).catch(function(){setReach(false)});
+}
+
+/* ---- polling ---- */
+function pollReal(){
+  if(busy)return;
+  busy=1;
+  tf(BASE+'/status').then(function(j){
+    busy=0;
+    if(mode!='real')return;
+    failCnt=0;S=j;
+    (j.ev||[]).forEach(function(e){if(e[0]>lastEv){lastEv=e[0];addLog(e[1])}});
+    setPill('conn','ONLINE','ok');
+    pushHist();render();
+  }).catch(function(){
+    busy=0;
+    if(mode!='real')return;
+    failCnt++;
+    setPill('conn','OFFLINE '+failCnt+'/3','bad');
+    if(failCnt>=3){
+      setMode('demo');
+      setReach(false);
+      showBanner('ESP32 Disconnected - switched to DEMO mode. Reconnect to Wi-Fi Bio Lung to resume.',true);
+    }
+  });
+}
+function tick(){
+  if(mode=='demo'){demoStep();pushHist();render()}
+  else pollReal();
+}
+
+/* ---- mode switching ---- */
+function setMode(m){
+  mode=m;demo=(m=='demo');busy=0;failCnt=0;
+  tHist=[];mHist=[];
+  $('m-demo').className=demo?'on':'';
+  if(demo){
+    simWarmEnd=Date.now()+15000;simT=0;simDark=false;simSmoke=false;simCirc=false;
+    S={t:27,mq:900,ldr:2000,dark:0,lm:'AUTO',pm:'AUTO',lo:0,po:0,st:1,sm:1,sl:1,lt:S.lt,mt:S.mt,warm:15,ev:[]};
+    setPill('conn','DEMO MODE','warn');
+    addLog('Switched to DEMO mode (simulated data)');
+    setReach(reachable);
+    reachTick();
+  }else{
+    S={t:null,mq:0,ldr:0,dark:0,lm:'AUTO',pm:'AUTO',lo:0,po:0,st:1,sm:1,sl:1,lt:S.lt,mt:S.mt,warm:0,ev:[]};
+    setPill('conn','connecting...','');
+    addLog('Switched to REAL mode (ESP32 at 192.168.4.1)');
+    setReach(true);
+    hideBanner();
+    pollReal();
+  }
+  render();
+}
+buildSegs();
+sliderSend('ltr','ldrth');sliderSend('mtr','mqth');
+$('m-demo').addEventListener('click',function(){if(mode!='demo')setMode('demo')});
+$('m-real').addEventListener('click',function(){
+  if(mode=='real')return;
+  if(reachable)setMode('real');
+  else showBanner(WIFI_MSG,false);
+});
+$('bwifi').addEventListener('click',openWifi);
+$('bclose').addEventListener('click',hideBanner);
+setMode('demo');
+setInterval(tick,1000);
+setInterval(reachTick,3000);
+</script></body></html>
